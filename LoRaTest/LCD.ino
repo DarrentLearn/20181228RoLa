@@ -1,3 +1,4 @@
+#ifdef Lcd
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 
@@ -13,11 +14,11 @@ int LcdBackligth = 0; //背光在顯示恢復為時鐘後幾秒熄滅
 
 void InitLcd(String HelloText)
 {
-  Serial.print("InitLcd...");
+  ShowWait(InitLcdWait,"InitLcd");
   lcd.begin(LcdCharacters, LcdLines); // 初始化 LCD，一行 16 的字元，共 2 行，預設開啟背光
   lcd.clear();
   LcdBacklight(true);
-  Serial.println("Done.");
+  EndWait(InitLcdWait,"Done");
   LcdShow(0, 0, HelloText);
 }
 
@@ -124,3 +125,4 @@ void LcdBacklight(bool onOff)
   else
     lcd.noBacklight(); // 關閉背光
 }
+#endif

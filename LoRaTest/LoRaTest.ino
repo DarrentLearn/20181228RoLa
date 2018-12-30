@@ -1,51 +1,78 @@
 #define RoLaReceiver  //RoLaSender  //
+#define Lcd
+
+int NullWait = 0;
+int InitIOPinWait = 1;
+int InitLcdWait = 2;
+int InitTimerWait = 3;
+int InitLoRaWait = 4;
+int RoLaSendWait = 11;
 
 String HelloText = "Hello!";
 
+#ifdef Lcd
 #define LcdLeft 0
 #define LcdCenter 1
 #define LcdRight 2
+#endif
 
-int counter = 0;
+#if defined RoLaSender
+#define cycleRoLaSender 3
+int timerRoLaSender = 0;
+int countLoraMessage = 0;
+#endif
 
 void setup() {
-#if defined RoLaSender
-  HelloText = "RoLaSender ready";
+#ifdef RoLaSender
+  HelloText = "RoLaSenderReady";
 #endif
-#if defined RoLaReceiver
-  HelloText = "RoLaReceiver ready";
+#ifdef RoLaReceiver
+  HelloText = "RoLaReceiReady";
 #endif
-
   Serial.begin(9600);
   Serial.println("");
   InitIOPin();
+#ifdef Lcd
   InitLcd(HelloText);
+#endif
   InitTimer();
   InitLoRa();
 }
 
 void loop() {
-#if defined RoLaSender
-  SendTestMessage();
-#endif
-  //#if defined RoLaReceiver
-  //  RoLaReceiv();
-  //#endif
+  delay(100);
+  Timebase();
 }
 
+void TimerMain()
+{
+  //Serial.println("TimerMain");
+
+#ifdef RoLaSender
+  if (timerRoLaSender++ > cycleRoLaSender)
+  {
+    SendTestMessage();
+    timerRoLaSender = 0;
+  }
+#endif
+}
+
+#ifdef RoLaSender
 void SendTestMessage()
 {
-  String message = "Hello " + String(counter);
+  String message = "Hello " + String(countLoraMessage);
   //Serial.println("LoRa Send:" + message);
+#ifdef Lcd
   LcdShow(0, message, LcdLeft);
+#endif
   RoLaSend(message);
-  counter++;
-  delay(5000);
+  countLoraMessage++;
 }
+#endif
 
 void InitIOPin()
 {
-  Serial.print("InitIOPin...");
+  ShowWait(InitIOPinWait, "InitIOPin");
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
   for (int i = 0; i < 6; i++)
@@ -53,5 +80,5 @@ void InitIOPin()
     digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
     delay(500);
   }
-  Serial.println("Done");
+  EndWait(InitIOPinWait, "Done");
 }
